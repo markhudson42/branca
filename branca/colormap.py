@@ -10,10 +10,10 @@ import json
 import math
 import os
 
-from jinja2 import Template
-
 from branca.element import ENV, Figure, JavascriptLink, MacroElement
 from branca.utilities import legend_scaler
+
+from jinja2 import Template
 
 rootpath = os.path.abspath(os.path.dirname(__file__))
 
@@ -87,7 +87,9 @@ class ColorMap(MacroElement):
         self.color_domain = [self.vmin + (self.vmax-self.vmin) * k/499. for
                              k in range(500)]
         self.color_range = [self.__call__(x) for x in self.color_domain]
-        self.tick_labels = legend_scaler(self.index)
+
+        if self.tick_labels is None:
+            self.tick_labels = legend_scaler(self.index)
 
         super(ColorMap, self).render(**kwargs)
 
@@ -175,6 +177,17 @@ class LinearColormap(ColorMap):
         The values corresponding to each color.
         It has to be sorted, and have the same length as `colors`.
         If None, a regular grid between `vmin` and `vmax` is created.
+    tick_labels : list of floats, default None
+        The values at which the colormap will be labelled.
+        Must be sorted, but is not required to be of the same length as `colors`.
+        If None but index is not None, uses the index, otherwise uses a regular
+        grid between `vmin` and `vmax`.
+    scale_width : integer, default 400
+        The width of the displayed colormap in pixels.
+    scale_height : integer, default 10
+        The height of the displayed colormap in pixels.
+    scale_opacity : float between 0. and 1., default 1.0
+        The opacity of the displayed colormap.
     vmin : float, default 0.
         The minimal value for the colormap.
         Values lower than `vmin` will be bound directly to `colors[0]`.
@@ -182,7 +195,9 @@ class LinearColormap(ColorMap):
         The maximal value for the colormap.
         Values higher than `vmax` will be bound directly to `colors[-1]`."""
 
-    def __init__(self, colors, index=None, vmin=0., vmax=1., caption=''):
+    def __init__(self, colors, index=None, tick_labels=None,
+                 scale_width=400, scale_height=10, scale_opacity=1.0,
+                 vmin=0., vmax=1., caption=''):
         super(LinearColormap, self).__init__(vmin=vmin, vmax=vmax,
                                              caption=caption)
 
@@ -194,6 +209,10 @@ class LinearColormap(ColorMap):
         else:
             self.index = list(index)
         self.colors = [_parse_color(x) for x in colors]
+        self.scale_width = scale_width
+        self.scale_height = scale_height
+        self.scale_opacity = scale_opacity
+        self.tick_labels = tick_labels
 
     def rgba_floats_tuple(self, x):
         """Provides the color corresponding to value `x` in the
@@ -356,6 +375,16 @@ class StepColormap(ColorMap):
         The values corresponding to each color.
         It has to be sorted, and have the same length as `colors`.
         If None, a regular grid between `vmin` and `vmax` is created.
+    tick_labels : list of floats, default None
+        The values at which the colormap will be labelled.
+        If None but index is not None, uses the index, otherwise uses a regular
+        grid between `vmin` and `vmax`.
+    scale_width : integer, default 400
+        The width of the displayed colormap in pixels.
+    scale_height L integer, default 10
+        The height of the displayed colormap in pixels.
+    scale_opacity : float between 0. and 1., default 1.0
+        The opacity of the displayed colormap.
     vmin : float, default 0.
         The minimal value for the colormap.
         Values lower than `vmin` will be bound directly to `colors[0]`.
@@ -364,7 +393,9 @@ class StepColormap(ColorMap):
         Values higher than `vmax` will be bound directly to `colors[-1]`.
 
     """
-    def __init__(self, colors, index=None, vmin=0., vmax=1., caption=''):
+    def __init__(self, colors, index=None, tick_labels=None,
+                 scale_width=400, scale_height=10, scale_opacity=1.0,
+                 vmin=0., vmax=1., caption=''):
         super(StepColormap, self).__init__(vmin=vmin, vmax=vmax,
                                            caption=caption)
 
@@ -376,6 +407,10 @@ class StepColormap(ColorMap):
         else:
             self.index = list(index)
         self.colors = [_parse_color(x) for x in colors]
+        self.scale_width = scale_width
+        self.scale_height = scale_height
+        self.scale_opacity = scale_opacity
+        self.tick_labels = tick_labels
 
     def rgba_floats_tuple(self, x):
         """

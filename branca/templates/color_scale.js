@@ -13,7 +13,7 @@
 
     {{this.get_name()}}.x = d3.scale.linear()
               .domain([{{ this.color_domain[0] }}, {{ this.color_domain[-1] }}])
-              .range([0, 400]);
+              .range([0, {{ this.scale_width }}]);
 
     {{this.get_name()}}.legend = L.control({position: 'topright'});
     {{this.get_name()}}.legend.onAdd = function (map) {var div = L.DomUtil.create('div', 'legend'); return div};
@@ -27,8 +27,8 @@
 
     {{this.get_name()}}.svg = d3.select(".legend.leaflet-control").append("svg")
         .attr("id", 'legend')
-        .attr("width", 450)
-        .attr("height", 40);
+        .attr("width", {{ this.scale_width+50 }})
+        .attr("height", {{ this.scale_height+30 }});
 
     {{this.get_name()}}.g = {{this.get_name()}}.svg.append("g")
         .attr("class", "key")
@@ -43,13 +43,14 @@
           };
         }))
       .enter().append("rect")
-        .attr("height", 10)
+        .attr("height", {{ this.scale_height }}) // height of the coloured scale
         .attr("x", function(d) { return d.x0; })
         .attr("width", function(d) { return d.x1 - d.x0; })
-        .style("fill", function(d) { return d.z; });
+        .style("fill", function(d) { return d.z; })
+        .style("opacity", {{ this.scale_opacity }});
 
     {{this.get_name()}}.g.call({{this.get_name()}}.xAxis).append("text")
         .attr("class", "caption")
-        .attr("y", 21)
+        .attr("y", {{ this.scale_height+11 }})
         .text('{{ this.caption }}');
 {% endmacro %}
